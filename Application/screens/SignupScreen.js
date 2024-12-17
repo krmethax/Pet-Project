@@ -18,7 +18,7 @@ export default function SignUpScreen({ navigation }) {
     const [step, setStep] = useState(1);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+    const [username, setUsername] = useState('');
     const handleNext = () => {
         if (firstName && lastName && dob && phoneNumber) {
             setStep(2);
@@ -116,7 +116,9 @@ export default function SignUpScreen({ navigation }) {
                     )}
 
                     {step === 2 && (
-                        <>
+                        <>  
+                            <Text style={[styles.header, { fontFamily: 'IBMPlexSansThai-Medium' }]}>ชื่อผู้ใช้งาน</Text>
+                            <TextInput style={styles.input} value={username} onChangeText={setUsername} />
                             <Text style={[styles.header, { fontFamily: 'IBMPlexSansThai-Medium' }]}>อีเมล</Text>
                             <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
 
