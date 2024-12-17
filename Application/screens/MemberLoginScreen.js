@@ -54,22 +54,26 @@ export default function MemberLoginScreen() {
 
       {/* ข้อความล็อกอิน */}
       <Text style={[styles.loginText, { fontFamily: 'IBMPlexSansThai-Bold' }]}>ล็อกอินเข้าสู่ระบบ</Text>
-
+    
+    <Text>
+      <Text style={[styles.emailText, { fontFamily: 'IBMPlexSansThai-Medium' }]}>อีเมล:</Text>
+    </Text>
       {/* ช่องกรอกอีเมล */}
       <TextInput
         style={styles.input}
-        placeholder="อีเมล"
         textContentType="emailAddress"
         autoCapitalize="none"
         value={email}
         onChangeText={setEmail}
       />
 
+      <Text>
+        <Text style={[styles.passwordText, { fontFamily: 'IBMPlexSansThai-Medium' }]}>รหัสผ่าน:</Text>
+      </Text>
       {/* ช่องกรอกรหัสผ่าน */}
       <View style={styles.passwordContainer}>
         <TextInput
           style={styles.passwordInput}
-          placeholder="รหัสผ่าน"
           textContentType="password"
           secureTextEntry={!showPassword}
           value={password}
