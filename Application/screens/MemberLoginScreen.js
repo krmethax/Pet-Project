@@ -18,7 +18,7 @@ export default function MemberLoginScreen() {
   const handleLogin = async () => {
     if (email && password) {
       try {
-        const response = await fetch('http://192.168.242.111/api/users/login', {
+        const response = await fetch('http://192.168.88.245:3000/api/users/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

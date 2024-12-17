@@ -28,18 +28,27 @@ export default function SignUpScreen({ navigation }) {
     };
 
     const handleSignUp = async () => {
+        // ตรวจสอบรหัสผ่าน
         if (password !== confirmPassword) {
             Alert.alert('รหัสผ่านไม่ตรงกัน');
             return;
         }
     
+        // ตรวจสอบการยอมรับข้อตกลง
         if (!isAgreed) {
             Alert.alert('กรุณายอมรับข้อตกลง');
             return;
         }
     
+        // ตรวจสอบข้อมูลให้ครบถ้วน
+        if (!firstName || !lastName || !dob || !phoneNumber || !email || !password) {
+            Alert.alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+            return;
+        }
+    
         try {
-            const response = await fetch('http://192.168.242.111:3000/api/users/create', {
+            // ส่งข้อมูลไปยังเซิร์ฟเวอร์
+            const response = await fetch('http://192.168.88.245:3000/api/users/create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -51,10 +60,11 @@ export default function SignUpScreen({ navigation }) {
                     tel: phoneNumber,
                     email,
                     password,
-                    confirm_password: confirmPassword,
+                    username, // ส่ง username หากมีการใช้
                 }),
             });
     
+            // ตรวจสอบผลการตอบกลับจากเซิร์ฟเวอร์
             if (!response.ok) {
                 const errorData = await response.json();
                 if (errorData.error === 'อีเมลนี้ถูกใช้งานไปแล้ว') {
@@ -65,6 +75,7 @@ export default function SignUpScreen({ navigation }) {
                 return;
             }
     
+            // ถ้าสมัครสมาชิกสำเร็จ
             const data = await response.json();
             Alert.alert('สมัครสมาชิกสำเร็จ');
             navigation.navigate('MemberLogin');
@@ -74,7 +85,6 @@ export default function SignUpScreen({ navigation }) {
         }
     };
     
-
     const onChangeDate = (event, selectedDate) => {
         setShowDatePicker(false);
         if (selectedDate) {
@@ -119,6 +129,7 @@ export default function SignUpScreen({ navigation }) {
                         <>  
                             <Text style={[styles.header, { fontFamily: 'IBMPlexSansThai-Medium' }]}>ชื่อผู้ใช้งาน</Text>
                             <TextInput style={styles.input} value={username} onChangeText={setUsername} />
+
                             <Text style={[styles.header, { fontFamily: 'IBMPlexSansThai-Medium' }]}>อีเมล</Text>
                             <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
 
