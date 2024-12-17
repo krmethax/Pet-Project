@@ -1,1 +1,3 @@
 react-navigation/native
+react-native-async-storage/async-storage
+jwt-decode
