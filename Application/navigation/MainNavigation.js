@@ -9,7 +9,7 @@ const Stack = createNativeStackNavigator();
 
 export default function MainNavigation() {
   return (
-    <Stack.Navigator initialRouteName="OnBoardingScreen">
+    <Stack.Navigator initialRouteName="OnBoarding">
       <Stack.Screen
         name="OnBoarding"
         component={OnBoarding}
