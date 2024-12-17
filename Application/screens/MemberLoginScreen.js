@@ -26,32 +26,10 @@ export default function MemberLoginScreen() {
           },
           body: JSON.stringify({ email, password }),
         });
-
-        if (response.ok) {
-          const data = await response.json();
-          
-          // Store the token in AsyncStorage
-          if (data.token) {
-            await AsyncStorage.setItem('token', data.token);  // Save the JWT token
-            await AsyncStorage.setItem('userEmail', email);    // Save the email for later use
   
-            // Optional: Store additional user info like first name and last name
-            if (data.firstname && data.lastname) {
-              await AsyncStorage.setItem('userFirstname', data.firstname);
-              await AsyncStorage.setItem('userLastname', data.lastname);
-            }
-
-            // Debugging: Check stored data
-            const token = await AsyncStorage.getItem('token');
-            console.log('Stored token:', token);
-            const userEmail = await AsyncStorage.getItem('userEmail');
-            console.log('Stored user email:', userEmail);
-
-            alert('เข้าสู่ระบบสำเร็จ');
-            navigation.replace('Home'); // Go to Home page after login
-          } else {
-            alert('Token ไม่ถูกต้อง');
-          }
+        if (response.ok) {
+          alert('เข้าสู่ระบบสำเร็จ');
+          navigation.replace('Home');
         } else {
           alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
         }
@@ -61,6 +39,32 @@ export default function MemberLoginScreen() {
       }
     } else {
       alert('กรุณากรอกอีเมลและรหัสผ่าน');
+    }
+  };
+  
+  const fetchUserData = async (email, token) => {
+    try {
+      const response = await fetch('http://192.168.88.245:3000/api/users/getuserbyemail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.firstname && data.lastname) {
+          // Store user data in AsyncStorage for later use in the Home screen
+          await AsyncStorage.setItem('userFirstname', data.firstname);
+          await AsyncStorage.setItem('userLastname', data.lastname);
+        }
+      } else {
+        console.error('Error fetching user data');
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
     }
   };
 

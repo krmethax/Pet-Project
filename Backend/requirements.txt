@@ -1,0 +1,5 @@
+express-session
+cors
+dotenv
+jsonwebtoken
+connect-pg-simple

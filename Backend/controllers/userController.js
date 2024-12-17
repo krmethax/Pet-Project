@@ -1,7 +1,15 @@
 const pool = require('../db'); // เชื่อมต่อกับ PostgreSQL database
-const jwt = require('jsonwebtoken');
+const session = require('express-session'); // นำเข้า express-session
 
-// เพิ่มผู้ใช้ใหม่
+// ตั้งค่า express-session
+const sessionOptions = {
+  secret: 'your_session_secret',  // คีย์สำหรับการเข้ารหัส session
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }  // ถ้าใช้ HTTPS จะต้องตั้งเป็น true
+};
+
+// ฟังก์ชันเพิ่มผู้ใช้ใหม่
 const createUser = async (req, res) => {
     const { firstname, lastname, date_of_birth, tel, email, password, username, profile_picture } = req.body;
 
@@ -16,7 +24,7 @@ const createUser = async (req, res) => {
         // หากไม่ซ้ำ ให้ทำการเพิ่มข้อมูลผู้ใช้
         const insertResult = await pool.query(
             'INSERT INTO "users" (firstname, lastname, date_of_birth, tel, email, password, username, profile_picture) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-            [firstname, lastname, date_of_birth, tel, email, password, username, profile_picture || null] // Profile picture สามารถเป็น null ได้
+            [firstname, lastname, date_of_birth, tel, email, password, username, profile_picture || null]
         );
 
         // ส่งข้อมูลผู้ใช้ที่เพิ่มไปแล้วกลับไปที่ฝั่ง Client
@@ -27,28 +35,28 @@ const createUser = async (req, res) => {
     }
 };
 
-  
+// ฟังก์ชันล็อกอิน
 const UserLogin = async (req, res) => {
     const { email, password } = req.body;
   
     try {
-        // Query to check if the user exists with the provided email and password
+        // ตรวจสอบว่าอีเมลและรหัสผ่านตรงกับข้อมูลในฐานข้อมูลหรือไม่
         const result = await pool.query('SELECT * FROM "users" WHERE email = $1', [email]);
 
         if (result.rows.length > 0) {
             const user = result.rows[0];
             
-            // Verify the password (you should hash the password in a real scenario)
+            // ตรวจสอบรหัสผ่าน (ในกรณีจริง ควรแฮชรหัสผ่าน)
             if (user.password === password) {
-                const payload = {
-                    userId: user.id, 
+                // เก็บข้อมูลผู้ใช้ใน session
+                req.session.user = {
+                    id: user.id,
                     email: user.email,
+                    firstname: user.firstname,
+                    lastname: user.lastname,
                 };
 
-                // Generate JWT with secret key and expiration
-                const token = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '1h' });
-
-                res.status(200).json({ message: 'เข้าสู่ระบบสำเร็จ', token });
+                res.status(200).json({ message: 'เข้าสู่ระบบสำเร็จ' });
             } else {
                 res.status(401).json({ message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
             }
@@ -61,7 +69,34 @@ const UserLogin = async (req, res) => {
     }
 };
 
+// ดึงข้อมูลผู้ใช้จาก session
+const getUserByEmail = async (req, res) => {
+    // ตรวจสอบว่า session มีข้อมูลผู้ใช้หรือไม่
+    if (req.session.user) {
+        const { email } = req.session.user;
+        try {
+            const result = await pool.query('SELECT firstname, lastname FROM "users" WHERE email = $1', [email]);
+            
+            if (result.rows.length > 0) {
+                const user = result.rows[0];
+                res.json({
+                    firstname: user.firstname,
+                    lastname: user.lastname,
+                });
+            } else {
+                res.status(404).json({ message: 'ไม่พบผู้ใช้' });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์' });
+        }
+    } else {
+        res.status(401).json({ message: 'กรุณาล็อกอินก่อน' });
+    }
+};
+
 module.exports = {
   createUser,
   UserLogin,
+  getUserByEmail,
 };

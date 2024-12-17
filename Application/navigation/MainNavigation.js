@@ -5,6 +5,7 @@ import SelectLogin from '../screens/SelectLoginScreen';
 import MemberLogin from '../screens/MemberLoginScreen';
 import SignUpScreen from '../screens/SignupScreen';
 import Home from '../screens/HomeScreen';
+import Setting from '../screens/SettingScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -34,6 +35,11 @@ export default function MainNavigation() {
       <Stack.Screen
         name="Home"
         component={Home}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={Setting}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
