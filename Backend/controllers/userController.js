@@ -1,4 +1,5 @@
 const pool = require('../db'); // เชื่อมต่อกับ PostgreSQL database
+const jwt = require('jsonwebtoken');
 
 // เพิ่มผู้ใช้ใหม่
 const createUser = async (req, res) => {
@@ -28,21 +29,36 @@ const createUser = async (req, res) => {
 
   
 const UserLogin = async (req, res) => {
-  const { email, password } = req.body;
+    const { email, password } = req.body;
+  
+    try {
+        // Query to check if the user exists with the provided email and password
+        const result = await pool.query('SELECT * FROM "users" WHERE email = $1', [email]);
 
-  try {
-    // ดึงข้อมูลผู้ใช้จากฐานข้อมูล
-    const result = await pool.query('SELECT * FROM "users" WHERE email = $1 AND password = $2', [email, password]);
+        if (result.rows.length > 0) {
+            const user = result.rows[0];
+            
+            // Verify the password (you should hash the password in a real scenario)
+            if (user.password === password) {
+                const payload = {
+                    userId: user.id, 
+                    email: user.email,
+                };
 
-    if (result.rows.length > 0) {
-      res.status(200).json({ message: 'เข้าสู่ระบบสำเร็จ' });
-    } else {
-      res.status(401).json({ message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
+                // Generate JWT with secret key and expiration
+                const token = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '1h' });
+
+                res.status(200).json({ message: 'เข้าสู่ระบบสำเร็จ', token });
+            } else {
+                res.status(401).json({ message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
+            }
+        } else {
+            res.status(401).json({ message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
+        }
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
     }
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
 };
 
 module.exports = {

@@ -3,6 +3,7 @@ import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons'; // นำเข้าไอคอนจาก Ionicons
+import AsyncStorage from '@react-native-async-storage/async-storage'; // นำเข้า AsyncStorage
 
 export default function MemberLoginScreen() {
   const navigation = useNavigation();
@@ -28,10 +29,29 @@ export default function MemberLoginScreen() {
 
         if (response.ok) {
           const data = await response.json();
-          await AsyncStorage.setItem('token', data.token); // เก็บ Token
-          await AsyncStorage.setItem('userEmail', email);  // เก็บ Email
-          alert('เข้าสู่ระบบสำเร็จ');
-          navigation.replace('Home'); // ไปยังหน้า Home หลังจากล็อกอินสำเร็จ
+          
+          // Store the token in AsyncStorage
+          if (data.token) {
+            await AsyncStorage.setItem('token', data.token);  // Save the JWT token
+            await AsyncStorage.setItem('userEmail', email);    // Save the email for later use
+  
+            // Optional: Store additional user info like first name and last name
+            if (data.firstname && data.lastname) {
+              await AsyncStorage.setItem('userFirstname', data.firstname);
+              await AsyncStorage.setItem('userLastname', data.lastname);
+            }
+
+            // Debugging: Check stored data
+            const token = await AsyncStorage.getItem('token');
+            console.log('Stored token:', token);
+            const userEmail = await AsyncStorage.getItem('userEmail');
+            console.log('Stored user email:', userEmail);
+
+            alert('เข้าสู่ระบบสำเร็จ');
+            navigation.replace('Home'); // Go to Home page after login
+          } else {
+            alert('Token ไม่ถูกต้อง');
+          }
         } else {
           alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
         }
@@ -54,10 +74,10 @@ export default function MemberLoginScreen() {
 
       {/* ข้อความล็อกอิน */}
       <Text style={[styles.loginText, { fontFamily: 'IBMPlexSansThai-Bold' }]}>ล็อกอินเข้าสู่ระบบ</Text>
-    
-    <Text>
-      <Text style={[styles.emailText, { fontFamily: 'IBMPlexSansThai-Medium' }]}>อีเมล:</Text>
-    </Text>
+
+      <Text>
+        <Text style={[styles.emailText, { fontFamily: 'IBMPlexSansThai-Medium' }]}>อีเมล:</Text>
+      </Text>
       {/* ช่องกรอกอีเมล */}
       <TextInput
         style={styles.input}
@@ -78,7 +98,6 @@ export default function MemberLoginScreen() {
           secureTextEntry={!showPassword}
           value={password}
           onChangeText={setPassword}
-
         />
         <TouchableOpacity onPress={toggleShowPassword} style={styles.toggleButton}>
           <Icon
@@ -109,6 +128,7 @@ export default function MemberLoginScreen() {
     </SafeAreaView>
   );
 }
+
 
 // สไตล์
 const styles = StyleSheet.create({
