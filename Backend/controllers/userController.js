@@ -79,24 +79,25 @@ const UserLogin = async (req, res) => {
 // ดึงข้อมูลผู้ใช้จาก session
 const getUser = async (req, res) => {
     try {
-      // ดึง token จาก header Authorization
-      const token = req.headers.authorization?.split(' ')[1];
-      if (!token) {
-        return res.status(401).json({ message: 'No token provided' });
-      }
-  
-      // ตรวจสอบและ decode token
-      const decoded = jwt.verify(token, 'your_secret_key'); // ใช้ secret key ที่ใช้สร้าง token
-  
-      // ดึงข้อมูลจาก decoded token
-      const { id, firstname, lastname } = decoded;
-  
-      res.status(200).json({ firstname, lastname });
+        // ดึง token จาก header Authorization
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
+
+        // ตรวจสอบและ decode token
+        const decoded = jwt.verify(token, 'your_secret_key'); // ใช้ secret key ที่ใช้สร้าง token
+
+        // ดึงข้อมูลจาก decoded token
+        const { id, firstname, lastname, email, profile_picture } = decoded;
+
+        // ส่งข้อมูลกลับไปยัง Client
+        res.status(200).json({ firstname, lastname, email, profile_picture }); // เพิ่ม email ที่นี่
     } catch (error) {
-      console.error('Error verifying token:', error);
-      res.status(401).json({ message: 'Invalid token' });
+        console.error('Error verifying token:', error);
+        res.status(401).json({ message: 'Invalid token' });
     }
-  };
+};
 
 module.exports = {
     createUser,

@@ -33,7 +33,7 @@ export default function HomeScreen() {
 
     const fetchUserData = async (sessionData) => {
       try {
-        const response = await fetch('http://10.253.62.75:3000/api/users/getuser', {
+        const response = await fetch('http://10.253.62.75:5000/api/users/getuser', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -75,20 +75,17 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={[styles.welcomeText, { fontFamily: 'IBMPlexSansThai-Bold' }]}>
+        <Text style={[styles.welcomeText, { fontFamily: 'IBMPlexSansThai-Medium' }]}>
           ชำระเงิน
         </Text>
       </View>
 
       {/* เนื้อหาหลัก */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.contentText}>This is the Home screen.</Text>
+        
       </ScrollView>
 
       {/* ปุ่ม Logout */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Logout</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }

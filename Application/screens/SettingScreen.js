@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,7 +17,8 @@ import defaultProfileIcon from '../assets/images/profile-2.png';
 
 export default function HomeScreen() {
   const navigation = useNavigation();
-  const [userData, setUserData] = useState({ firstname: '', lastname: '', profileIcon: '' });
+  const [userData, setUserData] = useState({ firstname: '', lastname: '', profileIcon: '', email: '' });
+  const [loading, setLoading] = useState(false);  // State สำหรับการโหลด
 
   useEffect(() => {
     const checkSession = async () => {
@@ -33,7 +35,7 @@ export default function HomeScreen() {
 
     const fetchUserData = async (sessionData) => {
       try {
-        const response = await fetch('http://10.253.62.75:3000/api/users/getuser', {
+        const response = await fetch('http://10.253.62.75:5000/api/users/getuser', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -50,6 +52,7 @@ export default function HomeScreen() {
           firstname: data.firstname,
           lastname: data.lastname,
           profileIcon: data.profile_picture,
+          email: data.email,
         });
       } catch (error) {
         console.error('Error fetching user data:', error.message);
@@ -62,36 +65,68 @@ export default function HomeScreen() {
 
   // ฟังก์ชันสำหรับการ Logout
   const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem('session');  // ลบเซสชันที่เก็บใน AsyncStorage
-      navigation.navigate('MemberLogin');  // นำผู้ใช้กลับไปหน้าล็อกอิน
-      Alert.alert('Success', 'คุณได้ออกจากระบบแล้ว');
-    } catch (error) {
-      console.error('Logout Error:', error.message);
-      Alert.alert('Error', 'เกิดข้อผิดพลาดในการออกจากระบบ');
-    }
+    Alert.alert(
+      'ยืนยันการออกจากระบบ',
+      'คุณต้องการออกจากระบบใช่หรือไม่?',
+      [
+        {
+          text: 'ยกเลิก',
+          onPress: () => console.log('Logout cancelled'),
+          style: 'cancel',
+        },
+        {
+          text: 'ออกจากระบบ',
+          onPress: async () => {
+            setLoading(true);  // เริ่มแสดง loader
+
+            try {
+              await AsyncStorage.removeItem('session');  // ลบเซสชันที่เก็บใน AsyncStorage
+              navigation.navigate('MemberLogin');  // นำผู้ใช้กลับไปหน้าล็อกอิน
+            } catch (error) {
+              console.error('Logout Error:', error.message);
+              Alert.alert('Error', 'เกิดข้อผิดพลาดในการออกจากระบบ');
+            } finally {
+              setLoading(false);  // หยุดแสดง loader
+            }
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={[styles.welcomeText, { fontFamily: 'IBMPlexSansThai-Bold' }]}>
+        <Text style={[styles.welcomeText, { fontFamily: 'IBMPlexSansThai-Medium' }]}>
           การตั้งค่า
         </Text>
-        <TouchableOpacity>
-          <Image source={userData.profileIcon ? { uri: userData.profileIcon } : defaultProfileIcon}
-            style={styles.profileIcon} />
-        </TouchableOpacity>
+      </View>
+
+      {/* การ์ดแสดงข้อมูลผู้ใช้ */}
+      <View style={styles.card}>
+        <Image
+          source={userData.profileIcon ? { uri: userData.profileIcon } : defaultProfileIcon}
+          style={styles.profileIcon}
+        />
+        <View style={styles.userInfo}>
+          <Text style={styles.cardTitle}>ชื่อ: {userData.firstname} {userData.lastname}</Text>
+          <Text style={[styles.cardText, { fontFamily: 'IBMPlexSansThai-Medium' }]}>อีเมล: {userData.email}</Text>
+        </View>
       </View>
 
       {/* เนื้อหาหลัก */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.contentText}>This is the Home screen.</Text>
+       
       </ScrollView>
 
       {/* ปุ่ม Logout */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Logout</Text>
+        {loading ? (  // แสดง Loader ถ้ากำลังออกจากระบบ
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Text style={styles.logoutText}>Logout</Text>
+        )}
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -112,10 +147,32 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#00C283',
   },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+    marginBottom: 20,
+  },
   profileIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 20,
+  },
+  userInfo: {
+    flexDirection: 'column', // จัดเรียงข้อมูลเป็นแนวตั้ง
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontFamily: 'IBMPlexSansThai-Medium',
+    color: '#333',
+    marginBottom: 5,
+  },
+  cardText: {
+    fontSize: 16,
+    fontFamily: 'IBMPlexSansThai',
+    color: '#333',
+    marginBottom: 5,
   },
   scrollContainer: {
     flexGrow: 1,

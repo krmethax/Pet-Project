@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // ถูกต้อง
-
+import { StyleSheet } from 'react-native';
 // นำเข้าหน้าจอต่างๆ ที่คุณมี
 import OnBoarding from '../screens/OnBoardingScreen';
 import SelectLogin from '../screens/SelectLoginScreen';
@@ -90,6 +90,11 @@ function BottomTabNavigator() {
         tabBarActiveTintColor: '#00C283',
         tabBarInactiveTintColor: '#888',
         headerShown: false, // ซ่อน header ของแต่ละหน้า
+        tabBarStyle: {
+          height: 70, // เพิ่มความสูงของ Tab Bar ที่นี่
+          paddingBottom: 5,
+          paddingTop: 10 // เพิ่มระยะห่างด้านล่างเพื่อให้มีช่องว่าง
+        },
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'หน้าหลัก' }} />

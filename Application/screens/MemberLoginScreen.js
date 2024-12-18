@@ -19,7 +19,7 @@ export default function MemberLoginScreen() {
   const handleLogin = async () => {
     if (email && password) {
       try {
-        const response = await fetch('http://10.253.62.75:3000/api/users/login', {
+        const response = await fetch('http://10.253.62.75:5000/api/users/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ export default function MemberLoginScreen() {
 
   const fetchUserData = async (email, token) => {
     try {
-      const response = await fetch('http://10.253.62.75:3000/api/users/getuserbyemail', {
+      const response = await fetch('http://10.253.62.75:5000/api/users/getuserbyemail', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

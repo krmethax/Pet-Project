@@ -27,6 +27,7 @@ export default function App() {
   Text.defaultProps.style = { fontFamily: 'IBMPlexSansThai-Medium' };
   Text.defaultProps.style = { fontFamily: 'IBMPlexSansThai-Light' };
   Text.defaultProps.style = { fontFamily: 'IBMPlexSansThai-Bold' };
+  Text.defaultProps.style = { fontFamily: 'IBMPlexSansThai-Regular' };
 
   return (
     <NavigationContainer>

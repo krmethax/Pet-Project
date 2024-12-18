@@ -12,6 +12,8 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import * as Location from 'expo-location';
+import LongdoMapView from 'longdo-map-react-native'; // Import Longdo Map
 
 // นำเข้ารูปโปรไฟล์เริ่มต้นจากเครื่อง
 import defaultProfileIcon from '../assets/images/profile-2.png';
@@ -25,8 +27,25 @@ import hamsterIcon from '../assets/images/hamster.png';
 export default function HomeScreen() {
   const navigation = useNavigation();
   const [userData, setUserData] = useState({ firstname: '', lastname: '', profileIcon: '' });
+  const [location, setLocation] = useState(null);
 
   useEffect(() => {
+    // Request location permission and get user's location
+    const getLocation = async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Permission to access location was denied');
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High, // ใช้ความแม่นยำสูง
+      });
+
+      setLocation(location.coords); // Store the location
+      console.log(location); // You can see the log in the console
+    };
+
     const checkSession = async () => {
       const sessionData = await AsyncStorage.getItem('session');
       if (sessionData) {
@@ -39,7 +58,7 @@ export default function HomeScreen() {
 
     const fetchUserData = async (sessionData) => {
       try {
-        const response = await fetch('http://10.253.62.75:3000/api/users/getuser', {
+        const response = await fetch('http://10.253.62.75:5000/api/users/getuser', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -62,6 +81,7 @@ export default function HomeScreen() {
       }
     };
 
+    getLocation();
     checkSession();
   }, []);
 
@@ -92,30 +112,43 @@ export default function HomeScreen() {
             <View style={styles.iconBackground}>
               <Image source={dogIcon} style={styles.categoryIcon} />
             </View>
-            <Text>สุนัข</Text>
+            <Text style={[styles.categoryText, { fontFamily: 'IBMPlexSansThai-Light' }]}>สุนัข</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.categoryItem}>
             <View style={styles.iconBackground}>
               <Image source={catIcon} style={styles.categoryIcon} />
             </View>
-            <Text>แมว</Text>
+            <Text style={[styles.categoryText, { fontFamily: 'IBMPlexSansThai-Light' }]}>แมว</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.categoryItem}>
             <View style={styles.iconBackground}>
               <Image source={rabbitIcon} style={styles.categoryIcon} />
             </View>
-            <Text>กระต่าย</Text>
+            <Text style={[styles.categoryText, { fontFamily: 'IBMPlexSansThai-Light' }]}>กระต่าย</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.categoryItem}>
             <View style={styles.iconBackground}>
               <Image source={hamsterIcon} style={styles.categoryIcon} />
             </View>
-            <Text>แฮมสเตอร์</Text>
+            <Text style={[styles.categoryText, { fontFamily: 'IBMPlexSansThai-Light' }]}>แฮมสเตอร์</Text>
           </TouchableOpacity>
         </View>
+
         <View>
-          <Text>บริการใกล้ฉัน</Text>
+          <Text style={[styles.serviceText, { fontFamily: 'IBMPlexSansThai-Medium' }]}>บริการใกล้ฉัน</Text>
         </View>
+
+        {/* Longdo Map */}
+        <View style={styles.mapContainer}>
+          {location && (
+            <LongdoMapView
+              style={styles.map}
+              center={{ lat: location.latitude, lon: location.longitude }}
+              zoom={12}
+            />
+          )}
+        </View>
+
         {/* การ์ดแนะนำ */}
         <View style={styles.cardContainer}>
           <Text style={[styles.cardTitle, { fontFamily: 'IBMPlexSansThai-Medium' }]}>สนใจเป็นพี่เลี้ยง</Text>
@@ -145,11 +178,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   greetingText: {
-    fontSize: 20,
+    fontSize: 24,
     color: '#00C283',
   },
-  usernameText: {
-    fontSize: 24,
+  nameText: {
+    fontSize: 18,
   },
   profileIcon: {
     width: 40,
@@ -157,7 +190,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   searchContainer: {
-    backgroundColor: '#F2F2F2',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ccc',
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
@@ -212,17 +247,17 @@ const styles = StyleSheet.create({
     height: 250,
     borderRadius: 10,
   },
-  bottomNav: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#00C283',
-    padding: 15,
-    alignItems: 'center',
+  mapContainer: {
+    height: 250,
+    borderRadius: 10,
+    marginTop: 20,
   },
-  navText: {
-    color: '#fff',
-    fontSize: 16,
+  map: {
+    flex: 1,
+    borderRadius: 10,
+  },
+  serviceText: {
+    fontSize: 18,
+    marginBottom: 10,
   },
 });
