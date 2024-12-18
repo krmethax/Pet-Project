@@ -34,7 +34,8 @@ app.use(express.json());
 app.use('/api/users', userRoutes);
 
 // เริ่มเซิร์ฟเวอร์ให้รันบน IP และพอร์ตที่กำหนด
-const host = process.env.HOST || '0.0.0.0'; // ใช้ 0.0.0.0 สำหรับทุก IP หรือสามารถใช้ IP เฉพาะเจาะจง
+const host = '10.253.62.75'; // IP ที่คุณต้องการให้ Express รันบน
+
 app.listen(PORT, host, () => {
   console.log(`Server is running on http://${host}:${PORT}`);
 });

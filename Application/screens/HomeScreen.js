@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   Image,
   StyleSheet,
   TouchableOpacity,
@@ -11,9 +10,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
-import BottomNav from '../components/BottomNav'; // นำเข้า BottomNav
 
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -34,9 +31,10 @@ export default function HomeScreen() {
 
     const fetchUserData = async (sessionData) => {
       try {
-        const response = await fetch('http://192.168.88.245:3000/api/users/getuserbyemail', {
+        const response = await fetch('http://10.253.62.75:3000/api/users/getuser', {
           method: 'GET',
           headers: {
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${sessionData}`,
           },
         });
@@ -63,7 +61,9 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={[styles.welcomeText, { fontFamily: 'IBMPlexSansThai-Bold' }]}>
-          สวัสดี, {userData.firstname} {userData.lastname}
+          {userData.firstname && userData.lastname
+            ? `สวัสดี, ${userData.firstname} ${userData.lastname}`
+            : 'กำลังโหลดข้อมูล...'}
         </Text>
         <TouchableOpacity>
           <Image source={require('../assets/images/user.png')} style={styles.profileIcon} />
@@ -73,10 +73,11 @@ export default function HomeScreen() {
       {/* เนื้อหาหลัก */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* ใส่เนื้อหาตามต้องการ */}
+        <Text>
+          This is the home screen.
+        </Text>
       </ScrollView>
 
-      {/* เรียกใช้ BottomNav */}
-      <BottomNav navigation={navigation} />
     </SafeAreaView>
   );
 }

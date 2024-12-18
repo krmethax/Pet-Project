@@ -48,7 +48,7 @@ export default function SignUpScreen({ navigation }) {
     
         try {
             // ส่งข้อมูลไปยังเซิร์ฟเวอร์
-            const response = await fetch('http://192.168.88.245:3000/api/users/create', {
+            const response = await fetch('http://10.253.62.75:3000/api/users/create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

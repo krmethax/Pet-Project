@@ -1,12 +1,13 @@
 const pool = require('../db'); // เชื่อมต่อกับ PostgreSQL database
-const session = require('express-session'); // นำเข้า express-session
+const session = require('express-session');
+const jwt = require('jsonwebtoken');  // นำเข้า express-session
 
 // ตั้งค่า express-session
 const sessionOptions = {
-  secret: 'your_session_secret',  // คีย์สำหรับการเข้ารหัส session
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false }  // ถ้าใช้ HTTPS จะต้องตั้งเป็น true
+    secret: 'your_session_secret',  // คีย์สำหรับการเข้ารหัส session
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }  // ถ้าใช้ HTTPS จะต้องตั้งเป็น true
 };
 
 // ฟังก์ชันเพิ่มผู้ใช้ใหม่
@@ -38,25 +39,30 @@ const createUser = async (req, res) => {
 // ฟังก์ชันล็อกอิน
 const UserLogin = async (req, res) => {
     const { email, password } = req.body;
-  
+
     try {
         // ตรวจสอบว่าอีเมลและรหัสผ่านตรงกับข้อมูลในฐานข้อมูลหรือไม่
         const result = await pool.query('SELECT * FROM "users" WHERE email = $1', [email]);
 
         if (result.rows.length > 0) {
             const user = result.rows[0];
-            
-            // ตรวจสอบรหัสผ่าน (ในกรณีจริง ควรแฮชรหัสผ่าน)
-            if (user.password === password) {
-                // เก็บข้อมูลผู้ใช้ใน session
-                req.session.user = {
-                    id: user.id,
-                    email: user.email,
-                    firstname: user.firstname,
-                    lastname: user.lastname,
-                };
 
-                res.status(200).json({ message: 'เข้าสู่ระบบสำเร็จ' });
+            // ตรวจสอบรหัสผ่าน (ในกรณีจริง ควรใช้การแฮชรหัสผ่าน)
+            if (user.password === password) {
+                // สร้าง JWT Token
+                const token = jwt.sign(
+                    {
+                        id: user.id,
+                        email: user.email,
+                        firstname: user.firstname,
+                        lastname: user.lastname,
+                    },
+                    'your_secret_key', // เปลี่ยนเป็น key ลับของคุณ
+                    { expiresIn: '1h' } // กำหนดให้ token หมดอายุใน 1 ชั่วโมง
+                );
+
+                // ส่ง token กลับไปที่ frontend พร้อมกับข้อความ
+                res.status(200).json({ message: 'เข้าสู่ระบบสำเร็จ', token });
             } else {
                 res.status(401).json({ message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
             }
@@ -70,33 +76,29 @@ const UserLogin = async (req, res) => {
 };
 
 // ดึงข้อมูลผู้ใช้จาก session
-const getUserByEmail = async (req, res) => {
-    // ตรวจสอบว่า session มีข้อมูลผู้ใช้หรือไม่
-    if (req.session.user) {
-        const { email } = req.session.user;
-        try {
-            const result = await pool.query('SELECT firstname, lastname FROM "users" WHERE email = $1', [email]);
-            
-            if (result.rows.length > 0) {
-                const user = result.rows[0];
-                res.json({
-                    firstname: user.firstname,
-                    lastname: user.lastname,
-                });
-            } else {
-                res.status(404).json({ message: 'ไม่พบผู้ใช้' });
-            }
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์' });
-        }
-    } else {
-        res.status(401).json({ message: 'กรุณาล็อกอินก่อน' });
+const getUser = async (req, res) => {
+    try {
+      // ดึง token จาก header Authorization
+      const token = req.headers.authorization?.split(' ')[1];
+      if (!token) {
+        return res.status(401).json({ message: 'No token provided' });
+      }
+  
+      // ตรวจสอบและ decode token
+      const decoded = jwt.verify(token, 'your_secret_key'); // ใช้ secret key ที่ใช้สร้าง token
+  
+      // ดึงข้อมูลจาก decoded token
+      const { id, firstname, lastname } = decoded;
+  
+      res.status(200).json({ firstname, lastname });
+    } catch (error) {
+      console.error('Error verifying token:', error);
+      res.status(401).json({ message: 'Invalid token' });
     }
-};
+  };
 
 module.exports = {
-  createUser,
-  UserLogin,
-  getUserByEmail,
+    createUser,
+    UserLogin,
+    getUser,
 };

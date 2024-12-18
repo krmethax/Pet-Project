@@ -57,18 +57,6 @@ export default function HomeScreen() {
     checkSession();
   }, []);
 
-  // ฟังก์ชันสำหรับการ Logout
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem('session');  // ลบเซสชันที่เก็บใน AsyncStorage
-      navigation.navigate('MemberLogin');  // นำผู้ใช้กลับไปหน้าล็อกอิน
-      Alert.alert('Success', 'คุณได้ออกจากระบบแล้ว');
-    } catch (error) {
-      console.error('Logout Error:', error.message);
-      Alert.alert('Error', 'เกิดข้อผิดพลาดในการออกจากระบบ');
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -84,13 +72,12 @@ export default function HomeScreen() {
 
       {/* เนื้อหาหลัก */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.contentText}>This is the Home screen.</Text>
+        {/* ใส่เนื้อหาตามต้องการ */}
+        <Text>
+          This is the Petsitter screen.
+        </Text>
       </ScrollView>
 
-      {/* ปุ่ม Logout */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Logout</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -118,22 +105,5 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-  },
-  contentText: {
-    fontSize: 16,
-    padding: 10,
-    color: '#333',
-  },
-  logoutButton: {
-    backgroundColor: '#FF4F5A',
-    padding: 15,
-    margin: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  logoutText: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: 'IBMPlexSansThai-Medium',
   },
 });

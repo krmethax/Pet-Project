@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons'; // นำเข้าไอคอนจาก Ionicons
@@ -19,7 +19,7 @@ export default function MemberLoginScreen() {
   const handleLogin = async () => {
     if (email && password) {
       try {
-        const response = await fetch('http://192.168.88.245:3000/api/users/login', {
+        const response = await fetch('http://10.253.62.75:3000/api/users/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -27,24 +27,27 @@ export default function MemberLoginScreen() {
           body: JSON.stringify({ email, password }),
         });
   
+        const result = await response.json();
+  
         if (response.ok) {
-          alert('เข้าสู่ระบบสำเร็จ');
-          navigation.replace('Home');
+          await AsyncStorage.setItem('session', result.token); // บันทึก token ลงใน AsyncStorage
+          Alert.alert('เข้าสู่ระบบสำเร็จ');
+          navigation.replace('HomeTabs');
         } else {
-          alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+          Alert.alert('Error', result.message);
         }
       } catch (error) {
         console.error(error);
-        alert('เกิดข้อผิดพลาด กรุณาลองอีกครั้ง');
+        Alert.alert('เกิดข้อผิดพลาด กรุณาลองอีกครั้ง');
       }
     } else {
-      alert('กรุณากรอกอีเมลและรหัสผ่าน');
+      Alert.alert('กรุณากรอกอีเมลและรหัสผ่าน');
     }
   };
-  
+
   const fetchUserData = async (email, token) => {
     try {
-      const response = await fetch('http://192.168.88.245:3000/api/users/getuserbyemail', {
+      const response = await fetch('http://10.253.62.75:3000/api/users/getuserbyemail', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,9 +82,9 @@ export default function MemberLoginScreen() {
       {/* ข้อความล็อกอิน */}
       <Text style={[styles.loginText, { fontFamily: 'IBMPlexSansThai-Bold' }]}>ล็อกอินเข้าสู่ระบบ</Text>
 
-      <Text>
+      
         <Text style={[styles.emailText, { fontFamily: 'IBMPlexSansThai-Medium' }]}>อีเมล:</Text>
-      </Text>
+     
       {/* ช่องกรอกอีเมล */}
       <TextInput
         style={styles.input}
@@ -91,9 +94,9 @@ export default function MemberLoginScreen() {
         onChangeText={setEmail}
       />
 
-      <Text>
+     
         <Text style={[styles.passwordText, { fontFamily: 'IBMPlexSansThai-Medium' }]}>รหัสผ่าน:</Text>
-      </Text>
+      
       {/* ช่องกรอกรหัสผ่าน */}
       <View style={styles.passwordContainer}>
         <TextInput
@@ -132,7 +135,6 @@ export default function MemberLoginScreen() {
     </SafeAreaView>
   );
 }
-
 
 // สไตล์
 const styles = StyleSheet.create({

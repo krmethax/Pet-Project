@@ -4,6 +4,7 @@ import { Text, View } from 'react-native';
 import { useFonts } from 'expo-font';
 import AppLoading from 'expo-app-loading';
 
+// นำเข้า MainNavigation
 import MainNavigation from './navigation/MainNavigation';
 
 export default function App() {
@@ -29,7 +30,7 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <MainNavigation />
+      <MainNavigation /> {/* เรียกใช้ MainNavigation */}
     </NavigationContainer>
   );
 }
