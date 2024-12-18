@@ -56,6 +56,7 @@ const UserLogin = async (req, res) => {
                         email: user.email,
                         firstname: user.firstname,
                         lastname: user.lastname,
+                        profile_picture: user.profile_picture
                     },
                     'your_secret_key', // เปลี่ยนเป็น key ลับของคุณ
                     { expiresIn: '1h' } // กำหนดให้ token หมดอายุใน 1 ชั่วโมง

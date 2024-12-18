@@ -12,9 +12,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 
+import defaultProfileIcon from '../assets/images/profile-2.png';
+
 export default function HomeScreen() {
   const navigation = useNavigation();
-  const [userData, setUserData] = useState({ firstname: '', lastname: '' });
+  const [userData, setUserData] = useState({ firstname: '', lastname: '', profileIcon: '' });
 
   useEffect(() => {
     const checkSession = async () => {
@@ -47,6 +49,7 @@ export default function HomeScreen() {
         setUserData({
           firstname: data.firstname,
           lastname: data.lastname,
+          profileIcon: data.profile_picture,
         });
       } catch (error) {
         console.error('Error fetching user data:', error.message);
@@ -57,27 +60,35 @@ export default function HomeScreen() {
     checkSession();
   }, []);
 
+  // ฟังก์ชันสำหรับการ Logout
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('session');  // ลบเซสชันที่เก็บใน AsyncStorage
+      navigation.navigate('MemberLogin');  // นำผู้ใช้กลับไปหน้าล็อกอิน
+      Alert.alert('Success', 'คุณได้ออกจากระบบแล้ว');
+    } catch (error) {
+      console.error('Logout Error:', error.message);
+      Alert.alert('Error', 'เกิดข้อผิดพลาดในการออกจากระบบ');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={[styles.welcomeText, { fontFamily: 'IBMPlexSansThai-Bold' }]}>
-          {userData.firstname && userData.lastname
-            ? `สวัสดี, ${userData.firstname} ${userData.lastname}`
-            : 'กำลังโหลดข้อมูล...'}
+          ชำระเงิน
         </Text>
-        <TouchableOpacity>
-          <Image source={require('../assets/images/user.png')} style={styles.profileIcon} />
-        </TouchableOpacity>
       </View>
 
       {/* เนื้อหาหลัก */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* ใส่เนื้อหาตามต้องการ */}
-        <Text>
-          This is the Petsitter screen.
-        </Text>
+        <Text style={styles.contentText}>This is the Home screen.</Text>
       </ScrollView>
 
+      {/* ปุ่ม Logout */}
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutText}>Logout</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -88,7 +99,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    backgroundColor: '#00C283',
     padding: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -96,7 +106,7 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 18,
-    color: '#fff',
+    color: '#00C283',
   },
   profileIcon: {
     width: 40,
@@ -105,5 +115,22 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
+  },
+  contentText: {
+    fontSize: 16,
+    padding: 10,
+    color: '#333',
+  },
+  logoutButton: {
+    backgroundColor: '#FF4F5A',
+    padding: 15,
+    margin: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  logoutText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'IBMPlexSansThai-Medium',
   },
 });

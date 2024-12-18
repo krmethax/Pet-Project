@@ -12,9 +12,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 
+import defaultProfileIcon from '../assets/images/profile-2.png';
+
 export default function HomeScreen() {
   const navigation = useNavigation();
-  const [userData, setUserData] = useState({ firstname: '', lastname: '' });
+  const [userData, setUserData] = useState({ firstname: '', lastname: '', profileIcon: '' });
 
   useEffect(() => {
     const checkSession = async () => {
@@ -47,6 +49,7 @@ export default function HomeScreen() {
         setUserData({
           firstname: data.firstname,
           lastname: data.lastname,
+          profileIcon: data.profile_picture,
         });
       } catch (error) {
         console.error('Error fetching user data:', error.message);
@@ -73,12 +76,11 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={[styles.welcomeText, { fontFamily: 'IBMPlexSansThai-Bold' }]}>
-          {userData.firstname && userData.lastname
-            ? `สวัสดี, ${userData.firstname} ${userData.lastname}`
-            : 'กำลังโหลดข้อมูล...'}
+          การตั้งค่า
         </Text>
         <TouchableOpacity>
-          <Image source={require('../assets/images/user.png')} style={styles.profileIcon} />
+          <Image source={userData.profileIcon ? { uri: userData.profileIcon } : defaultProfileIcon}
+            style={styles.profileIcon} />
         </TouchableOpacity>
       </View>
 
@@ -101,7 +103,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    backgroundColor: '#00C283',
     padding: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 18,
-    color: '#fff',
+    color: '#00C283',
   },
   profileIcon: {
     width: 40,

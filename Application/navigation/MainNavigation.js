@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { AsyncStorage } from '@react-native-async-storage/async-storage'; // เพิ่มการใช้ AsyncStorage
+import AsyncStorage from '@react-native-async-storage/async-storage'; // ถูกต้อง
 
 // นำเข้าหน้าจอต่างๆ ที่คุณมี
 import OnBoarding from '../screens/OnBoardingScreen';
